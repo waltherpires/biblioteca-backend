@@ -45,8 +45,6 @@ public class User implements Observer{
     }
     @Override
     public void update(Book book) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        System.out.println(name + " Notificado");
     }
-    
 }
