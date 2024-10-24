@@ -33,6 +33,8 @@ public class Book implements Subject{
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> observers = new ArrayList<>();
+
+    
     
     @Override
     public void registerObserver(Observer observer) {
