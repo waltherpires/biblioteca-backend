@@ -108,15 +108,29 @@ public class BookService {
         entry.setAddedDate(LocalDate.now());
 
         book.getWaitlistEntries().add(entry);
+
+        // Adicionar usuário como observador
+        if (!book.getObservers().contains(user)) {
+            book.getObservers().add(user);
+        }
     }
 
     //Alugar livro para próximo da fila
     public void rentToNextUser(Book book){
         if(!book.getWaitlistEntries().isEmpty()){
+            
+            //remover primeiro da fila de espera
             WaitlistEntry entry = book.getWaitlistEntries().remove(0);
             User nextUser = entry.getUser();
+
+            // criar novo emprestimo para o primeiro da fila
             Rent newRent = rentService.createRent(nextUser, book);
             book.getRents().add(newRent);
+
+            //remover usuário da lista de observers
+            if(book.getObservers().contains(nextUser)){
+                book.removeObserver(nextUser);
+            }
         }
     }
 }

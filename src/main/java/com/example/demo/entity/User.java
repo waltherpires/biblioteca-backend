@@ -42,8 +42,6 @@ public class User implements Observer{
         this.rents = rents;
     }
 
-
-
     public List<WaitlistEntry> getWaitlistEntries() {
         return waitlistEntries;
     }
@@ -94,6 +92,12 @@ public class User implements Observer{
 
     @Override
     public void update(Book book) {
-        
+        List<WaitlistEntry> waitlist = book.getWaitlistEntries();
+        int positionInQueue = waitlist.indexOf(this) + 1; // Posição do usuário na fila
+        if (positionInQueue > 0) {
+            System.out.println(getName() + ", você está na posição " + positionInQueue + " na fila de espera para o livro: " + book.getTitle());
+        } else {
+            System.out.println(getName() + ", você não está na fila de espera para o livro: " + book.getTitle());
+        }
     }
 }
