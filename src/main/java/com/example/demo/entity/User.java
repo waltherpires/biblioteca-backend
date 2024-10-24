@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -22,7 +24,11 @@ public class User implements Observer{
     private String email;
     private String phone;
 
+    @ManyToMany(mappedBy = "observers")
     private List<Book> observedBooks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "renter")
+    private List<Book> rentedBooks = new ArrayList<>();
 
     public String getPhone() {
         return phone;

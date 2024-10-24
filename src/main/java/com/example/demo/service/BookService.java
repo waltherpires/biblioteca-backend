@@ -45,10 +45,19 @@ public class BookService {
         bookRepository.deleteById(id);
     }
 
-    public Book addUserToBookList(Long bookId, Long userId){
+    public Book addObserverToBookList(Long bookId, Long userId){
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        book.getObservers().add(user);
+     
+        // metodo observer
+        book.registerObserver(user);
+
+        if(!user.getObservedBooks().contains(book)){
+            user.getObservedBooks().add(book);
+        }
+
+        userRepository.save(user);
         return bookRepository.save(book);
     }
+
 }

@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Book implements Subject{
@@ -34,11 +35,24 @@ public class Book implements Subject{
     )
     private List<User> observers = new ArrayList<>();
 
+    // Pessoa que alugou
+    @ManyToOne
+    @JoinColumn(name = "renter_id")
+    private User renter;
     
-    
+    public User getRenter() {
+        return renter;
+    }
+
+    public void setRenter(User renter) {
+        this.renter = renter;
+    }
+
     @Override
     public void registerObserver(Observer observer) {
-        observers.add((User) observer);
+        if(!observers.contains(observer)) {
+            observers.add((User) observer);
+        }
     }
 
     @Override

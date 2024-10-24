@@ -49,4 +49,11 @@ public class UserController {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PostMapping("/{userId}/rent/{bookId}")
+    public ResponseEntity<String> rentBook(@PathVariable Long userId, @PathVariable Long bookId){
+        userService.rentBook(userId, bookId);
+        return ResponseEntity.ok("Book rented successfully");
+    }
+    
 }
