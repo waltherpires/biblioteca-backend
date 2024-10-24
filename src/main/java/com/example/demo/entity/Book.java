@@ -65,7 +65,7 @@ public class Book implements Subject{
         }
     }
 
-    public List<Rent> getRents() {
+        public List<Rent> getRents() {
         return rents;
     }
 

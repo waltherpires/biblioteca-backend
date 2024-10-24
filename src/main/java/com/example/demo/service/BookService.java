@@ -70,7 +70,22 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public Book removeObserverFromBookList(Long bookId, Long userId){
+    public void addObserverToBook(Long bookId, Long userId){
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+     
+        // metodo observer
+        book.registerObserver(user);
+    }
+
+    public void notifyObservers(Long id){
+        Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+
+        //metodo observer
+        book.notifyObservers();
+    }
+
+    public void removeObserverFromBook(Long bookId, Long userId){
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
      
@@ -82,7 +97,7 @@ public class BookService {
         }
 
         userRepository.save(user);
-        return bookRepository.save(book);
+        bookRepository.save(book);
     }
  
     //Adicionar usuario a fila de espera

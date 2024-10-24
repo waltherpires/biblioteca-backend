@@ -44,7 +44,7 @@ public class RentService {
     public Rent saveRent(Rent rent){
         return rentRepository.save(rent);
     }
-    
+
     public Rent createRent(User user, Book book){
         Rent rent = new Rent();
         rent.setUser(user);
@@ -58,13 +58,11 @@ public class RentService {
         return rentRepository.save(rent);
     }
 
-
     public void ReturnBook(Rent rent){
         rent.setReturned(true);
         rent.setReturnDate(LocalDate.now());
 
         Book book = rent.getBook();
         book.notifyObservers();
-    }
-    
+    }    
 }
