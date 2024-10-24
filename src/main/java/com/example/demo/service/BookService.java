@@ -2,23 +2,32 @@ package com.example.demo.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Book;
+import com.example.demo.entity.Rent;
 import com.example.demo.entity.User;
+import com.example.demo.entity.WaitlistEntry;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.UserRepository;
 
 @Service
 public class BookService {
     
-    @Autowired
-    private BookRepository bookRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final BookRepository bookRepository;
+    private final UserRepository userRepository;
+    private final RentService rentService;
 
+    public BookService(BookRepository bookRepository, UserRepository userRepository, RentService rentService){
+        this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
+
+        this.rentService = rentService;
+    }
+
+    // CRUD Livros
     public List<Book> findAllBooks(){
         return bookRepository.findAll();
     }
@@ -45,6 +54,7 @@ public class BookService {
         bookRepository.deleteById(id);
     }
 
+    // Metodos relacionados a Observer
     public Book addObserverToBookList(Long bookId, Long userId){
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
@@ -60,4 +70,38 @@ public class BookService {
         return bookRepository.save(book);
     }
 
+    public Book removeObserverFromBookList(Long bookId, Long userId){
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+     
+        // metodo observer
+        book.removeObserver(user);
+
+        if(user.getObservedBooks().contains(book)){
+            user.getObservedBooks().remove(book);
+        }
+
+        userRepository.save(user);
+        return bookRepository.save(book);
+    }
+ 
+    //Adicionar usuario a fila de espera
+    public void addToWaitList(Book book, User user){
+        WaitlistEntry entry = new WaitlistEntry();
+        entry.setBook(book);
+        entry.setUser(user);
+        entry.setAddedDate(LocalDate.now());
+
+        book.getWaitlistEntries().add(entry);
+    }
+
+    //Alugar livro para próximo da fila
+    public void rentToNextUser(Book book){
+        if(!book.getWaitlistEntries().isEmpty()){
+            WaitlistEntry entry = book.getWaitlistEntries().remove(0);
+            User nextUser = entry.getUser();
+            Rent newRent = rentService.createRent(nextUser, book);
+            book.getRents().add(newRent);
+        }
+    }
 }

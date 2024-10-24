@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.demo.entity.observer.Observer;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,8 +28,29 @@ public class User implements Observer{
     @ManyToMany(mappedBy = "observers")
     private List<Book> observedBooks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "renter")
-    private List<Book> rentedBooks = new ArrayList<>();
+    @OneToMany(mappedBy = "user")
+    private List<Rent> rents = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WaitlistEntry> waitlistEntries = new ArrayList<>();
+
+    public List<Rent> getRents() {
+        return rents;
+    }
+
+    public void setRents(List<Rent> rents) {
+        this.rents = rents;
+    }
+
+
+
+    public List<WaitlistEntry> getWaitlistEntries() {
+        return waitlistEntries;
+    }
+
+    public void setWaitlistEntries(List<WaitlistEntry> waitlistEntries) {
+        this.waitlistEntries = waitlistEntries;
+    }
 
     public String getPhone() {
         return phone;
@@ -72,6 +94,6 @@ public class User implements Observer{
 
     @Override
     public void update(Book book) {
-        System.out.println(name + " Notificado");
+        
     }
 }

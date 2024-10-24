@@ -7,14 +7,7 @@ import com.example.demo.entity.observer.Observer;
 import com.example.demo.entity.observer.Subject;
 import com.example.demo.enums.StatusBook;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Book implements Subject{
@@ -35,17 +28,20 @@ public class Book implements Subject{
     )
     private List<User> observers = new ArrayList<>();
 
-    // Pessoa que alugou
-    @ManyToOne
-    @JoinColumn(name = "renter_id")
-    private User renter;
-    
-    public User getRenter() {
-        return renter;
+    // Empréstimos
+    @OneToMany(mappedBy = "book")
+    private List<Rent> rents = new ArrayList<>();
+
+    //Lista de espera
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WaitlistEntry> waitlistEntries = new ArrayList<>();
+
+    public List<WaitlistEntry> getWaitlistEntries() {
+        return waitlistEntries;
     }
 
-    public void setRenter(User renter) {
-        this.renter = renter;
+    public void setWaitlistEntries(List<WaitlistEntry> waitlistEntries) {
+        this.waitlistEntries = waitlistEntries;
     }
 
     @Override
@@ -57,7 +53,9 @@ public class Book implements Subject{
 
     @Override
     public void removeObserver(Observer observer) {
-        observers.remove((User) observer);
+        if(observers.contains(observer)){
+            observers.remove((User) observer);
+        }
     }
 
     @Override
@@ -65,6 +63,14 @@ public class Book implements Subject{
         for (User user : observers){
             ((Observer) user).update(this);
         }
+    }
+
+    public List<Rent> getRents() {
+        return rents;
+    }
+
+    public void setRents(List<Rent> rents) {
+        this.rents = rents;
     }
 
     public Long getId() {
