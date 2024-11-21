@@ -54,10 +54,10 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/{userId}/rent/{bookId}")
-    public ResponseEntity<String> rentBook(@PathVariable Long userId, @PathVariable Long bookId){
-        userService.rentBook(userId, bookId);
-        return ResponseEntity.ok("Book rented successfully");
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<List<String>> getAllMessages(@PathVariable Long userId){
+        List<String>  messages = userService.getAllMessagesByUser(userId);
+
+        return new ResponseEntity<>(messages, HttpStatus.OK);
     }
-    
 }

@@ -19,30 +19,18 @@ public class Book implements Subject{
     private String author;
     private StatusBook status;
 
-    // Pessoas interessadas
+    // Pessoas interessadas (Observers)
     @ManyToMany
     @JoinTable(
         name = "book_observers",
         joinColumns = @JoinColumn(name = "book_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> observers = new ArrayList<>();
+    private List<Observer> observers = new ArrayList<>();
 
     // Empréstimos
     @OneToMany(mappedBy = "book")
     private List<Rent> rents = new ArrayList<>();
-
-    //Lista de espera
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WaitlistEntry> waitlistEntries = new ArrayList<>();
-
-    public List<WaitlistEntry> getWaitlistEntries() {
-        return waitlistEntries;
-    }
-
-    public void setWaitlistEntries(List<WaitlistEntry> waitlistEntries) {
-        this.waitlistEntries = waitlistEntries;
-    }
 
     @Override
     public void registerObserver(Observer observer) {
@@ -60,7 +48,7 @@ public class Book implements Subject{
 
     @Override
     public void notifyObservers() {
-        for (User user : observers){
+        for (Observer user : observers){
             ((Observer) user).update(this);
         }
     }
@@ -103,13 +91,17 @@ public class Book implements Subject{
 
     public void setStatus(StatusBook status) {
         this.status = status;
+
+        if(status.equals(StatusBook.DISPONIVEL)) {
+            notifyObservers();
+        }
     }
 
-    public List<User> getObservers() {
+    public List<Observer> getObservers() {
         return observers;
     }
 
-    public void setObservers(List<User> observers) {
+    public void setObservers(List<Observer> observers) {
         this.observers = observers;
     }
 }

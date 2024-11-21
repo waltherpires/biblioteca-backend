@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.example.demo.entity.Book;
 import com.example.demo.entity.Rent;
 import com.example.demo.entity.User;
-import com.example.demo.entity.WaitlistEntry;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.UserRepository;
 
@@ -70,11 +69,15 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public void addObserverToBook(Long bookId, Long userId){
+    public void addObserverToBookById(Long bookId, Long userId){
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
      
         // metodo observer
+        book.registerObserver(user);
+    }
+
+    public void addObserverToBook(Book book, User user){
         book.registerObserver(user);
     }
 
@@ -99,38 +102,7 @@ public class BookService {
         userRepository.save(user);
         bookRepository.save(book);
     }
- 
-    //Adicionar usuario a fila de espera
-    public void addToWaitList(Book book, User user){
-        WaitlistEntry entry = new WaitlistEntry();
-        entry.setBook(book);
-        entry.setUser(user);
-        entry.setAddedDate(LocalDate.now());
 
-        book.getWaitlistEntries().add(entry);
 
-        // Adicionar usuário como observador
-        if (!book.getObservers().contains(user)) {
-            book.getObservers().add(user);
-        }
-    }
 
-    //Alugar livro para próximo da fila
-    public void rentToNextUser(Book book){
-        if(!book.getWaitlistEntries().isEmpty()){
-            
-            //remover primeiro da fila de espera
-            WaitlistEntry entry = book.getWaitlistEntries().remove(0);
-            User nextUser = entry.getUser();
-
-            // criar novo emprestimo para o primeiro da fila
-            Rent newRent = rentService.createRent(nextUser, book);
-            book.getRents().add(newRent);
-
-            //remover usuário da lista de observers
-            if(book.getObservers().contains(nextUser)){
-                book.removeObserver(nextUser);
-            }
-        }
-    }
 }

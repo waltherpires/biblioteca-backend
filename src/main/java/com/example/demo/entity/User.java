@@ -5,14 +5,8 @@ import java.util.List;
 
 import com.example.demo.entity.observer.Observer;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.example.demo.entity.observer.Subject;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Users")
@@ -25,14 +19,14 @@ public class User implements Observer{
     private String email;
     private String phone;
 
+    @ElementCollection
+    private List<String> messages = new ArrayList<>();
+
     @ManyToMany(mappedBy = "observers")
-    private List<Book> observedBooks = new ArrayList<>();
+    private List<Subject> observedBooks = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Rent> rents = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WaitlistEntry> waitlistEntries = new ArrayList<>();
 
     public List<Rent> getRents() {
         return rents;
@@ -40,14 +34,6 @@ public class User implements Observer{
 
     public void setRents(List<Rent> rents) {
         this.rents = rents;
-    }
-
-    public List<WaitlistEntry> getWaitlistEntries() {
-        return waitlistEntries;
-    }
-
-    public void setWaitlistEntries(List<WaitlistEntry> waitlistEntries) {
-        this.waitlistEntries = waitlistEntries;
     }
 
     public String getPhone() {
@@ -82,22 +68,26 @@ public class User implements Observer{
         this.email = email;
     }
 
-    public List<Book> getObservedBooks() {
+    public List<String> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<String> messages) {
+        this.messages = messages;
+    }
+
+    public List<Subject> getObservedBooks() {
         return observedBooks;
     }
 
-    public void setObservedBooks(List<Book> observedBooks) {
+    public void setObservedBooks(List<Subject> observedBooks) {
         this.observedBooks = observedBooks;
     }
 
+    //Notificar sobre livros disponíveis (Metodo relacionado ao Padrao Observer)
     @Override
     public void update(Book book) {
-        List<WaitlistEntry> waitlist = book.getWaitlistEntries();
-        int positionInQueue = waitlist.indexOf(this) + 1; // Posição do usuário na fila
-        if (positionInQueue > 0) {
-            System.out.println(getName() + ", você está na posição " + positionInQueue + " na fila de espera para o livro: " + book.getTitle());
-        } else {
-            System.out.println(getName() + ", você não está na fila de espera para o livro: " + book.getTitle());
-        }
+        String notification ="O livro: " + book.getTitle() + " está disponível!";
+        getMessages().add(notification);
     }
 }

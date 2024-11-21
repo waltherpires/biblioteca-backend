@@ -2,12 +2,7 @@ package com.example.demo.entity;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Rent {
@@ -17,15 +12,20 @@ public class Rent {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "book_id")
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "data_inicio", nullable = false)
     private LocalDate rentDate;
+
+    @Column(name = "data_final", nullable = false)
     private LocalDate returnDate;
+
+    @Column(name = "data_entrega", nullable = false)
     private LocalDate dueDate;
     private boolean isReturned;
 
