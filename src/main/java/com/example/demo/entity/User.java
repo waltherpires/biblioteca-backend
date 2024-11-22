@@ -6,10 +6,12 @@ import java.util.List;
 import com.example.demo.entity.observer.Observer;
 
 import com.example.demo.entity.observer.Subject;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User implements Observer{
 
     @Id
@@ -23,9 +25,10 @@ public class User implements Observer{
     private List<String> messages = new ArrayList<>();
 
     @ManyToMany(mappedBy = "observers")
-    private List<Subject> observedBooks = new ArrayList<>();
+    private List<Book> observedBooks = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Rent> rents = new ArrayList<>();
 
     public List<Rent> getRents() {
@@ -76,11 +79,11 @@ public class User implements Observer{
         this.messages = messages;
     }
 
-    public List<Subject> getObservedBooks() {
+    public List<Book> getObservedBooks() {
         return observedBooks;
     }
 
-    public void setObservedBooks(List<Subject> observedBooks) {
+    public void setObservedBooks(List<Book> observedBooks) {
         this.observedBooks = observedBooks;
     }
 

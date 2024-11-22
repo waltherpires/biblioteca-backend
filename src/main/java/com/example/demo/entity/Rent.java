@@ -22,10 +22,10 @@ public class Rent {
     @Column(name = "data_inicio", nullable = false)
     private LocalDate rentDate;
 
-    @Column(name = "data_final", nullable = false)
+    @Column(name = "data_entrega")
     private LocalDate returnDate;
 
-    @Column(name = "data_entrega", nullable = false)
+    @Column(name = "data_prazo", nullable = false)
     private LocalDate dueDate;
     private boolean isReturned;
 

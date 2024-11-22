@@ -1,7 +1,9 @@
 package com.example.demo.service.strategy;
 
 import com.example.demo.entity.Book;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SortStrategyFactory {
 
   private final SortByTitleStrategy sortByTitleStrategy;
@@ -18,8 +20,17 @@ public class SortStrategyFactory {
       this.sortByAuthorStrategy = sortByAuthorStrategy;
   }
 
-  public SortStrategy<Book> geStrategy(String sortBy){
-    switch (sortBy)
+  public SortStrategy<Book> getStrategy(String sortBy){
+      switch (sortBy.toLowerCase()) {
+          case "title":
+              return sortByTitleStrategy;
+          case "title-desc":
+              return sortByTitleDescendingStrategy;
+          case "author":
+              return sortByAuthorStrategy;
+          default:
+              throw new IllegalArgumentException("Strategy inválida: " + sortBy);
+      }
   }
 
 }

@@ -4,41 +4,51 @@ import java.util.List;
 
 import com.example.demo.entity.Rent;
 import com.example.demo.entity.User;
+import com.example.demo.service.BookSortService;
 import com.example.demo.service.RentService;
 import com.example.demo.service.UserService;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.entity.Book;
 import com.example.demo.service.BookService;
 
-@Controller
+@RestController
 @RequestMapping("/api/books")
 public class BookController {
 
-    private BookService bookService;
-    private RentService rentService;
-    private UserService userService;
+    private final BookService bookService;
+    private final RentService rentService;
+    private final UserService userService;
+    private final BookSortService bookSortService;
 
-    public BookController(BookService bookService, RentService rentService, UserService userService){
+    public BookController(
+            BookService bookService,
+            RentService rentService,
+            UserService userService,
+            BookSortService bookSortService
+    ){
         this.bookService = bookService;
         this.rentService = rentService;
         this.userService = userService;
+        this.bookSortService = bookSortService;
+    }
+
+    @GetMapping("/sorted")
+    public ResponseEntity<List<Book>> getSortedBooks(@RequestParam String sortBy){
+        List<Book> books = bookService.findAllBooks();
+        List<Book> sortedBooks = bookSortService.sortBooks(books, sortBy);
+        return ResponseEntity.ok(sortedBooks);
     }
 
     @GetMapping
     public List<Book> getAllBooks(){
         return bookService.findAllBooks();
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Book> getBookById(@PathVariable Long id){
@@ -82,7 +92,7 @@ public class BookController {
         }
     }
 
-    @DeleteMapping("/rents/{rentId}")
+    @DeleteMapping("{bookId}/rents/{rentId}")
     public ResponseEntity<Void> finishRent(@PathVariable Long bookId, @PathVariable Long rentId){
         Rent rent = rentService.findRentById(rentId)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada!"));
@@ -93,7 +103,25 @@ public class BookController {
         } catch( RuntimeException e ) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
     }
 
+    @PostMapping("{bookId}/observers/{userId}")
+    public ResponseEntity<Book> addObserverToBook(@PathVariable Long bookId, @PathVariable Long userId){
+        try{
+            Book book = bookService.addObserverToBookById(bookId, userId);
+            return new ResponseEntity<>(book, HttpStatus.OK);
+        }catch( RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/{bookId}/observers/{userId}")
+    public ResponseEntity<Void> removeObserverFromBook(@PathVariable Long bookId, @PathVariable Long userId) {
+        try {
+            bookService.removeObserverFromBook(bookId, userId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

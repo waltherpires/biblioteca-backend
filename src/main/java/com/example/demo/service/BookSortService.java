@@ -4,17 +4,20 @@ import java.util.List;
 
 import com.example.demo.entity.Book;
 import com.example.demo.service.strategy.SortStrategy;
+import com.example.demo.service.strategy.SortStrategyFactory;
+import org.springframework.stereotype.Service;
 
+@Service
 public class BookSortService {
 
-  private SortStrategy<Book> sortStrategy;
+  private SortStrategyFactory sortStrategyFactory;
 
-  public void setSortStrategy(SortStrategy<Book> sortStrategy){
-    this.sortStrategy = sortStrategy;
+  public BookSortService(SortStrategyFactory sortStrategyFactory){
+    this.sortStrategyFactory = sortStrategyFactory;
   }
 
-  public List<Book> sortBooks(List<Book> books){
-    return sortStrategy.sort(books);
+  public List<Book> sortBooks(List<Book> books, String sortBy){
+    SortStrategy<Book> strategy = sortStrategyFactory.getStrategy(sortBy);
+    return strategy.sort(books);
   }
-
 }

@@ -7,6 +7,8 @@ import com.example.demo.entity.observer.Observer;
 import com.example.demo.entity.observer.Subject;
 import com.example.demo.enums.StatusBook;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -17,19 +19,23 @@ public class Book implements Subject{
     private Long id;
     private String title;
     private String author;
-    private StatusBook status;
+
+    @Enumerated(EnumType.STRING)
+    private StatusBook status = StatusBook.DISPONIVEL; ;
 
     // Pessoas interessadas (Observers)
     @ManyToMany
+    @JsonIgnore
     @JoinTable(
         name = "book_observers",
         joinColumns = @JoinColumn(name = "book_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<Observer> observers = new ArrayList<>();
+    private List<User> observers = new ArrayList<>();
 
     // Empréstimos
     @OneToMany(mappedBy = "book")
+    @JsonIgnore
     private List<Rent> rents = new ArrayList<>();
 
     @Override
@@ -97,11 +103,11 @@ public class Book implements Subject{
         }
     }
 
-    public List<Observer> getObservers() {
+    public List<User> getObservers() {
         return observers;
     }
 
-    public void setObservers(List<Observer> observers) {
+    public void setObservers(List<User> observers) {
         this.observers = observers;
     }
 }

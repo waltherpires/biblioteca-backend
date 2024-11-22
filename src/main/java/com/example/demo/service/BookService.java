@@ -17,13 +17,10 @@ public class BookService {
     
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
-    private final RentService rentService;
 
-    public BookService(BookRepository bookRepository, UserRepository userRepository, RentService rentService){
+    public BookService(BookRepository bookRepository, UserRepository userRepository){
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
-
-        this.rentService = rentService;
     }
 
     // CRUD Livros
@@ -54,31 +51,23 @@ public class BookService {
     }
 
     // Metodos relacionados a Observer
-    public Book addObserverToBookList(Long bookId, Long userId){
+    public Book addObserverToBookById(Long bookId, Long userId){
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-     
-        // metodo observer
+
+        addObserverToBook(book, user);
+        return book;
+    }
+
+    public void addObserverToBook(Book book, User user){
         book.registerObserver(user);
+        bookRepository.save(book);
 
         if(!user.getObservedBooks().contains(book)){
             user.getObservedBooks().add(book);
         }
 
         userRepository.save(user);
-        return bookRepository.save(book);
-    }
-
-    public void addObserverToBookById(Long bookId, Long userId){
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-     
-        // metodo observer
-        book.registerObserver(user);
-    }
-
-    public void addObserverToBook(Book book, User user){
-        book.registerObserver(user);
     }
 
     public void notifyObservers(Long id){

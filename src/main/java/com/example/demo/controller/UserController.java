@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 
-@Controller
+@RestController
 @RequestMapping("/api/users")
 public class UserController {
     
@@ -55,8 +55,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}/messages")
-    public ResponseEntity<List<String>> getAllMessages(@PathVariable Long userId){
-        List<String>  messages = userService.getAllMessagesByUser(userId);
+    public ResponseEntity<List<String>> getAllMessages(@PathVariable Long id){
+        List<String>  messages = userService.getAllMessagesByUser(id);
 
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }

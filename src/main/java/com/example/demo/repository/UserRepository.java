@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT m FROM Users u JOIN u.messages m WHERE u.id = :userId")
+    @Query("SELECT u.messages FROM User u WHERE u.id = :userId")
     List<String> findMessagesByUserId(@Param("userId") Long userId);
+
 }

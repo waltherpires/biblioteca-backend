@@ -20,11 +20,9 @@ public class RentService {
     
     private final RentRepository rentRepository;
     private final BookService bookService;
-    private final UserService userService;
 
-    public RentService(RentRepository rentRepository, BookService bookService, UserService userService) {
+    public RentService(RentRepository rentRepository, BookService bookService) {
         this.rentRepository = rentRepository;
-        this.userService = userService;
         this.bookService = bookService;
     }
 
@@ -55,11 +53,11 @@ public class RentService {
     public Rent createRent(User user, Book book){
         Rent rent = new Rent();
 
-        book.registerObserver(user);
+        bookService.addObserverToBook(book, user);
 
-        rent.getBook().setStatus(StatusBook.RESERVADO);
         rent.setUser(user);
         rent.setBook(book);
+        rent.getBook().setStatus(StatusBook.ALUGADO);
         rent.setReturned(false);
 
         LocalDate rentDate = LocalDate.now();
