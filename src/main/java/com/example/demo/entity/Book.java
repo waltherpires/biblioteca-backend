@@ -3,12 +3,12 @@ package com.example.demo.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.entity.User.User;
 import com.example.demo.entity.observer.Observer;
 import com.example.demo.entity.observer.Subject;
 import com.example.demo.enums.StatusBook;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity

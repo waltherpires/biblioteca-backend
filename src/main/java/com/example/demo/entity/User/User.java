@@ -1,25 +1,38 @@
-package com.example.demo.entity;
+package com.example.demo.entity.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import com.example.demo.entity.Book;
+import com.example.demo.entity.Rent;
 import com.example.demo.entity.observer.Observer;
 
-import com.example.demo.entity.observer.Subject;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
-public class User implements Observer{
+public class User implements Observer, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+    @Column(nullable = false, unique = true)
     private String email;
+    @Column(name = "password", nullable = false)
+    private String password;
+    @Column(name = "phone", nullable = false)
     private String phone;
+    @Column(name = "typeOfUser")
+    @Enumerated(EnumType.STRING)
+    private UserRoles typeOfUser;
 
     @ElementCollection
     private List<String> messages = new ArrayList<>();
@@ -63,6 +76,11 @@ public class User implements Observer{
         this.name = name;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
     public String getEmail() {
         return email;
     }
@@ -70,6 +88,11 @@ public class User implements Observer{
     public void setEmail(String email) {
         this.email = email;
     }
+
+
+    public UserRoles getTypeOfUser() { return typeOfUser; }
+
+    public void setTypeOfUser(UserRoles typeOfUser) { this.typeOfUser = typeOfUser; }
 
     public List<String> getMessages() {
         return messages;
@@ -83,6 +106,7 @@ public class User implements Observer{
         return observedBooks;
     }
 
+
     public void setObservedBooks(List<Book> observedBooks) {
         this.observedBooks = observedBooks;
     }
@@ -92,5 +116,40 @@ public class User implements Observer{
     public void update(Book book) {
         String notification ="O livro: " + book.getTitle() + " está disponível!";
         getMessages().add(notification);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(typeOfUser);
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 }

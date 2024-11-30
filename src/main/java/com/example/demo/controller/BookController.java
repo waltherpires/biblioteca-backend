@@ -3,21 +3,19 @@ package com.example.demo.controller;
 import java.util.List;
 
 import com.example.demo.entity.Rent;
-import com.example.demo.entity.User;
+import com.example.demo.entity.User.User;
 import com.example.demo.service.BookSortService;
 import com.example.demo.service.RentService;
 import com.example.demo.service.UserService;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.entity.Book;
 import com.example.demo.service.BookService;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/books")
 public class BookController {
 
     private final BookService bookService;

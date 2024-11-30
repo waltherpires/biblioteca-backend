@@ -2,24 +2,29 @@ package com.example.demo.controller;
 
 import java.util.List;
 
+import com.example.demo.Security.Token.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.entity.User;
+import com.example.demo.entity.User.User;
 import com.example.demo.service.UserService;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
     
     @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil){
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping
@@ -35,28 +40,50 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user){
-        return userService.saveUser(user);
+    public ResponseEntity<User> createUser(@RequestBody User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userService.saveUser(user);
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user){
         try {
-            return new ResponseEntity<>(userService.updateUser(id, user), HttpStatus.OK);
+            User updatedUser = userService.updateUser(id, user);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
         } catch (RuntimeException e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);            
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<User> deleteUser(@PathVariable Long id){
+    public ResponseEntity<Void> deleteUserById(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+        String tokenWithoutBearer = token.replace("Bearer ", "");
+        String emailFromToken = jwtUtil.extractUsername(tokenWithoutBearer);
+        User authenticatedUser = userService.findByEmail(emailFromToken);
+        if (emailFromToken == null || authenticatedUser == null || !authenticatedUser.getId().equals(id)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<Long> getCurrentUserId(){
+        Long userId = userService.getCurrentUserId();
+        if(userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return new ResponseEntity<>(userId, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/messages")
     public ResponseEntity<List<String>> getAllMessages(@PathVariable Long id){
         List<String>  messages = userService.getAllMessagesByUser(id);
+
+        if (messages == null || messages.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
 
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }

@@ -6,13 +6,11 @@ import java.util.Optional;
 import java.time.LocalDate;
 
 import com.example.demo.enums.StatusBook;
-import com.example.demo.repository.BookRepository;
-import com.example.demo.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Book;
 import com.example.demo.entity.Rent;
-import com.example.demo.entity.User;
+import com.example.demo.entity.User.User;
 import com.example.demo.repository.RentRepository;
 
 @Service
