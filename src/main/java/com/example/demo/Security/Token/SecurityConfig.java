@@ -36,9 +36,11 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/books").permitAll()
                     .requestMatchers(HttpMethod.GET, "/books/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/books/sorted/**").permitAll()
+                    .requestMatchers(HttpMethod.POST,  "/books/**").permitAll()
                     .requestMatchers(HttpMethod.DELETE, "/books/**").hasAnyAuthority("professor", "administrador")
-                    .requestMatchers(HttpMethod.POST, "/books/**").hasAnyAuthority("professor", "administrador")
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/users").permitAll()
                     .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority("administrador")

@@ -20,13 +20,13 @@ public class Rent {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "data_inicio", nullable = false)
+    @Column(name = "data_inicio")
     private LocalDate rentDate;
 
     @Column(name = "data_entrega")
     private LocalDate returnDate;
 
-    @Column(name = "data_prazo", nullable = false)
+    @Column(name = "data_prazo")
     private LocalDate dueDate;
     private boolean isReturned;
 

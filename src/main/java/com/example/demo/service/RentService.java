@@ -32,6 +32,10 @@ public class RentService {
         return rentRepository.findById(id);
     }
 
+    public List<Rent> findRentsByBookId(Long bookId) {
+        return rentRepository.findByBookId(bookId);
+    }
+
     public Rent updateRent(Long id, Rent updatedRent){
         return rentRepository.findById(id)
             .map(rent -> {
@@ -48,22 +52,41 @@ public class RentService {
         return rentRepository.save(rent);
     }
 
-    public Rent createRent(User user, Book book){
+    public Rent createReserve(User user, Book book) {
+        boolean userAlreadyInQueue = book.getRents().stream()
+                .anyMatch(rent -> rent.getUser().equals(user) && !rent.isReturned());
+
+        if (userAlreadyInQueue) {
+            throw new IllegalArgumentException("Usuário já está na fila de reservas para este livro.");
+        }
+
         Rent rent = new Rent();
 
+        // Adiciona o usuário como observador do livro
         bookService.addObserverToBook(book, user);
 
         rent.setUser(user);
         rent.setBook(book);
-        rent.getBook().setStatus(StatusBook.ALUGADO);
-        rent.setReturned(false);
+        rent.setReturned(false); // A reserva não foi devolvida
 
-        LocalDate rentDate = LocalDate.now();
-        rent.setRentDate(rentDate);
+        // Não define rentDate nem dueDate ainda
+        rent.setRentDate(null); // Rent ainda não começou
+        rent.setDueDate(null);  // Não tem data de devolução
 
-        rent.setDueDate(rentDate.plusDays(14));
-
+        // Salva a reserva
         return rentRepository.save(rent);
+    }
+
+    public void confirmRent(Long rentId) {
+        Rent rent = rentRepository.findById(rentId).orElseThrow(() -> new RuntimeException("Reserva não encontrada"));
+
+        // Verifica se a data de aluguel ainda não foi definida
+        if (rent.getRentDate() == null) {
+            LocalDate rentDate = LocalDate.now();
+            rent.setRentDate(rentDate); // Define rentDate como a data atual
+            rent.setDueDate(rentDate.plusDays(14)); // Define a dueDate (prazo de devolução)
+            rentRepository.save(rent); // Atualiza no banco
+        }
     }
 
     public void returnBook(Rent rent){
@@ -76,5 +99,7 @@ public class RentService {
         bookService.removeObserverFromBook(book.getId(), user.getId());
 
         book.setStatus(StatusBook.DISPONIVEL);
+
+        book.notifyObservers();
     }    
 }

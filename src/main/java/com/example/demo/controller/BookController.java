@@ -47,7 +47,6 @@ public class BookController {
         return bookService.findAllBooks();
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Book> getBookById(@PathVariable Long id){
         return bookService.findBookById(id)
@@ -75,22 +74,40 @@ public class BookController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/{bookId}/rents/{userId}")
-    public ResponseEntity<Rent> createRent(@PathVariable Long bookId, @PathVariable Long userId){
+    // Criar reserva
+    @PostMapping("/{bookId}/rents/{userId}/reserve")
+    public ResponseEntity<Rent> createReserve(@PathVariable Long bookId, @PathVariable Long userId){
         Book book = bookService.findBookById(bookId)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado!"));
         User user = userService.findUserById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
         try{
-            Rent createdRent = rentService.createRent(user, book);
+            Rent createdRent = rentService.createReserve(user, book);
             return new ResponseEntity<>(createdRent, HttpStatus.CREATED);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<> (HttpStatus.CONFLICT);
         }
     }
 
-    @DeleteMapping("{bookId}/rents/{rentId}")
+    @GetMapping("/{bookId}/rents")
+    public ResponseEntity<List<Rent>> getRentsByBookId(@PathVariable Long bookId) {
+        List<Rent> rents = rentService.findRentsByBookId(bookId);
+        return ResponseEntity.ok(rents);
+    }
+
+    // Confirmar reserva e transformar em aluguel
+    @PostMapping("/{bookId}/rents/{rentId}/confirm")
+    public ResponseEntity<String> confirmRent(@PathVariable Long rentId) {
+        try {
+            rentService.confirmRent(rentId); // Confirma o aluguel
+            return new ResponseEntity<>("Aluguel confirmado com sucesso.", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>("Erro ao confirmar o aluguel", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PatchMapping("{bookId}/rents/{rentId}")
     public ResponseEntity<Void> finishRent(@PathVariable Long bookId, @PathVariable Long rentId){
         Rent rent = rentService.findRentById(rentId)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada!"));
@@ -100,26 +117,6 @@ public class BookController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch( RuntimeException e ) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PostMapping("{bookId}/observers/{userId}")
-    public ResponseEntity<Book> addObserverToBook(@PathVariable Long bookId, @PathVariable Long userId){
-        try{
-            Book book = bookService.addObserverToBookById(bookId, userId);
-            return new ResponseEntity<>(book, HttpStatus.OK);
-        }catch( RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @DeleteMapping("/{bookId}/observers/{userId}")
-    public ResponseEntity<Void> removeObserverFromBook(@PathVariable Long bookId, @PathVariable Long userId) {
-        try {
-            bookService.removeObserverFromBook(bookId, userId);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
         }
     }
 }

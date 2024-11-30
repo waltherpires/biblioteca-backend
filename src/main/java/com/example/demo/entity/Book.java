@@ -1,7 +1,9 @@
 package com.example.demo.entity;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import com.example.demo.entity.User.User;
 import com.example.demo.entity.observer.Observer;
@@ -34,7 +36,7 @@ public class Book implements Subject{
     private List<User> observers = new ArrayList<>();
 
     // Empréstimos
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Rent> rents = new ArrayList<>();
 
@@ -54,12 +56,16 @@ public class Book implements Subject{
 
     @Override
     public void notifyObservers() {
-        for (Observer user : observers){
-            ((Observer) user).update(this);
+        int position = 1;
+
+        for (User user : observers){
+            String message = "O livro '" + this.getTitle() + "' está disponível. Há " + (position - 1) + " pessoas a sua frente na fila.";
+            user.getMessages().add(message);
+            position++;
         }
     }
 
-        public List<Rent> getRents() {
+    public List<Rent> getRents() {
         return rents;
     }
 
@@ -97,10 +103,6 @@ public class Book implements Subject{
 
     public void setStatus(StatusBook status) {
         this.status = status;
-
-        if(status.equals(StatusBook.DISPONIVEL)) {
-            notifyObservers();
-        }
     }
 
     public List<User> getObservers() {

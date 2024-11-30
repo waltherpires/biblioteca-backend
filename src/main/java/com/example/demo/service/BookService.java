@@ -3,6 +3,8 @@ package com.example.demo.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.entity.Rent;
+import com.example.demo.repository.RentRepository;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Book;
@@ -12,7 +14,7 @@ import com.example.demo.repository.UserRepository;
 
 @Service
 public class BookService {
-    
+
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
 
@@ -68,6 +70,17 @@ public class BookService {
         userRepository.save(user);
     }
 
+    public void checkAndNotifyNextRent(Long id){
+        Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+        Rent firstRent = book.getRents().getFirst();
+
+        Rent nextRent = book.getRents().get(1);
+        if (nextRent != null) {
+            User nextUser = nextRent.getUser();
+            book.notifyObservers();
+        }
+    }
+
     public void notifyObservers(Long id){
         Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found"));
 
@@ -89,7 +102,5 @@ public class BookService {
         userRepository.save(user);
         bookRepository.save(book);
     }
-
-
 
 }
