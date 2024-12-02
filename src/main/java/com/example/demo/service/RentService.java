@@ -80,6 +80,8 @@ public class RentService {
     public void confirmRent(Long rentId) {
         Rent rent = rentRepository.findById(rentId).orElseThrow(() -> new RuntimeException("Reserva não encontrada"));
 
+        rent.getBook().setStatus(StatusBook.ALUGADO);
+
         // Verifica se a data de aluguel ainda não foi definida
         if (rent.getRentDate() == null) {
             LocalDate rentDate = LocalDate.now();
@@ -92,13 +94,12 @@ public class RentService {
     public void returnBook(Rent rent){
         rent.setReturned(true);
         rent.setReturnDate(LocalDate.now());
+        rent.getBook().setStatus(StatusBook.DISPONIVEL);
 
         //Removendo user de observers do book
         User user = rent.getUser();
         Book book = rent.getBook();
         bookService.removeObserverFromBook(book.getId(), user.getId());
-
-        book.setStatus(StatusBook.DISPONIVEL);
 
         book.notifyObservers();
     }    
